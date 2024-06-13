@@ -6,7 +6,7 @@ from .models import Task, Department, CustomUser
 class TaskForm(ModelForm):
     class Meta:
         model = Task
-        fields = ['title', 'description', 'department', 'assignee', 'status',  'due_date']
+        fields = ['title', 'description', 'department', 'assignee', 'status',  'due_date', 'recurring']
 
 
 class DepartmentForm(ModelForm):

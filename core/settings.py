@@ -52,7 +52,8 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'company_app.CustomUser'
 
 CRONJOBS = [
-    ('0 0 * * *', 'company_app.cron.send_due_task_notifications')
+    ('0 0 * * *', 'company_app.cron.send_due_task_notifications'),
+    ('0 0 * * *', 'company_app.cron.handle_recurring_tasks'),
 ]
 
 

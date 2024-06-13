@@ -8,6 +8,7 @@ django = "*"
 python-decouple = "*"
 django-bootstrap4 = "*"
 django-crontab = "*"
+python-dateutil = "*"
 
 [dev-packages]
 
