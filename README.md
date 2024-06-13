@@ -30,9 +30,9 @@ This is a web-based application designed to streamline task management and organ
 1. Clone the repository: `git clone https://github.com/weshy007/elewa-edu-tech-interview.git`
 
 2. Install dependencies:
-- Create an environment with `pipenv shell` then install depandancies with `pipenv sync`.
+    - Create an environment with `pipenv shell` then install depandancies with `pipenv sync`.
 3. Configure settings:
-- Rename `example.env` to `.env` and update the configuration variables accordingly.
+    - Rename `example.env` to `.env` and update the configuration variables accordingly.
 
 ## Usage
 1. Run migrations: `make migrate`. 
