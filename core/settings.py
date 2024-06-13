@@ -43,12 +43,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'bootstrap4',
+    'django_crontab',
 
     'company_app',
 ]
 
 
 AUTH_USER_MODEL = 'company_app.CustomUser'
+
+CRONJOBS = [
+    ('0 0 * * *', 'company_app.cron.send_due_task_notifications')
+]
 
 
 MIDDLEWARE = [
@@ -142,4 +147,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = 'index'
+
 LOGOUT_REDIRECT_URL = 'index'
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_USE_TLS = config('EMAIL_USE_TLS')
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT')
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')

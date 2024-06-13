@@ -64,6 +64,25 @@ def dashboard(request):
 
     return render(request, 'manager_dashboard.html', context)
 
+@login_required
+def summary_dashboard(request):
+    if request.user.is_manager:
+        departments = Department.objects.filter(manager=request.user)
+        total_tasks = Task.objects.filter(department__in=departments).count()
+        completed_tasks = Task.objects.filter(department__in=departments, status='Done').count()
+        pending_tasks = Task.objects.filter(department__in=departments, status='In Progress').count()
+        task_completion_rate = (completed_tasks / total_tasks) * 100 if total_tasks > 0 else 0
+
+        context = {
+            'departments': departments,
+            'total_tasks': total_tasks,
+            'completed_tasks': completed_tasks,
+            'pending_tasks': pending_tasks,
+            'task_completion_rate': task_completion_rate,
+        }
+        return render(request, 'summary_dashboard.html', context)
+    return redirect('dashboard')
+
 
 # Task views
 @login_required
