@@ -1,21 +1,21 @@
-from django import forms
+from django.forms import ModelForm
 
 from .models import Task, Department, CustomUser
 
 
-class TaskForm(forms.ModelForm):
+class TaskForm(ModelForm):
     class Meta:
-        models = Task
+        model = Task
         fields = ['title', 'description', 'department', 'assignee', 'status']
 
 
-class DepartmentForm(forms.ModelForm):
+class DepartmentForm(ModelForm):
     class Meta:
-        models = Department
+        model = Department
         fields = ['name', 'manager']
 
     
-class CustomUserForm(forms.ModelForm):
+class CustomUserForm(ModelForm):
     class Meta:
-        models = CustomUser
-        fields = ['username', 'password', 'is_manager']
+        model = CustomUser
+        fields = ['username', 'password']
