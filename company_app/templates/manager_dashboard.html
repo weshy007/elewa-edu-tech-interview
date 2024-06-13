@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Dashboard</h1>
+    <ul>
+        {% for department in departments %}
+
+            {% for task in tasks %}
+                <li>{{ task.title }} - {{ task.status }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+    
+
+{% endblock %}

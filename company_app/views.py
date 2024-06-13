@@ -1,7 +1,9 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from .forms import CustomUserForm
+from .models import Department, Task
 
 # Create your views here.
 def index(request):
@@ -33,6 +35,8 @@ def user_login(request):
         
         user = authenticate(username=username, password=password)  
 
+        redirect('index')
+
         if user is not None:
             login(request, user)
             return redirect('index')
@@ -42,3 +46,98 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('index')
+
+
+@login_required
+def dashboard(request):
+    if request.user.is_manager:
+        # Get all departments
+        departments = Department.objects.filter(manager=request.user)
+        tasks = Task.objects.filter(department__in=departments)
+    else:
+        tasks = Task.objects.filter(assignee=request.user)
+    
+    context = {
+        # 'departments': departments,
+        'tasks': tasks
+    }
+
+    return render(request, 'manager_dashboard.html', context)
+
+@login_required
+def summary_dashboard(request):
+    if request.user.is_manager:
+        departments = Department.objects.filter(manager=request.user)
+        total_tasks = Task.objects.filter(department__in=departments).count()
+        completed_tasks = Task.objects.filter(department__in=departments, status='Done').count()
+        pending_tasks = Task.objects.filter(department__in=departments, status='In Progress').count()
+        task_completion_rate = (completed_tasks / total_tasks) * 100 if total_tasks > 0 else 0
+
+        context = {
+            'departments': departments,
+            'total_tasks': total_tasks,
+            'completed_tasks': completed_tasks,
+            'pending_tasks': pending_tasks,
+            'task_completion_rate': task_completion_rate,
+        }
+        return render(request, 'summary_dashboard.html', context)
+    return redirect('dashboard')
+
+
+# Task views
+@login_required
+def create_task(request):
+    pass
+
+
+@login_required
+def update_task(request, task_id):
+    pass
+
+
+@login_required
+def delete_task(request, task_id):
+    pass
+
+
+# Department views
+@login_required
+def create_department(request):
+    pass
+
+
+@login_required
+def update_department(request, department_id):
+    pass
+
+
+@login_required
+def edit_department(request, department_id):
+    pass   
+
+
+@login_required
+def delete_department(request, department_id):
+    pass
+
+
+# User views
+@login_required
+def manage_employees(request):
+    pass
+
+
+@login_required
+def move_employee(request, employee_id, new_department_id):
+    pass
+
+
+@login_required
+def remove_employee(request, employee_id):
+    pass
+
+
+
+
+
+
