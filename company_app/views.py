@@ -63,3 +63,62 @@ def dashboard(request):
     }
 
     return render(request, 'manager_dashboard.html', context)
+
+
+# Task views
+@login_required
+def create_task(request):
+    pass
+
+
+@login_required
+def update_task(request, task_id):
+    pass
+
+
+@login_required
+def delete_task(request, task_id):
+    pass
+
+
+# Department views
+@login_required
+def create_department(request):
+    pass
+
+
+@login_required
+def update_department(request, department_id):
+    pass
+
+
+@login_required
+def edit_department(request, department_id):
+    pass   
+
+
+@login_required
+def delete_department(request, department_id):
+    pass
+
+
+# User views
+@login_required
+def manage_employees(request):
+    pass
+
+
+@login_required
+def move_employee(request, employee_id, new_department_id):
+    pass
+
+
+@login_required
+def remove_employee(request, employee_id):
+    pass
+
+
+
+
+
+
