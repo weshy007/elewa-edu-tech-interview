@@ -1,7 +1,9 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from .forms import CustomUserForm
+from .models import Department, Task
 
 # Create your views here.
 def index(request):
@@ -33,6 +35,8 @@ def user_login(request):
         
         user = authenticate(username=username, password=password)  
 
+        redirect('index')
+
         if user is not None:
             login(request, user)
             return redirect('index')
@@ -42,3 +46,20 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('index')
+
+
+@login_required
+def dashboard(request):
+    if request.user.is_manager:
+        # Get all departments
+        departments = Department.objects.filter(manager=request.user)
+        tasks = Task.objects.filter(department__in=departments)
+    else:
+        tasks = Task.objects.filter(assignee=request.user)
+    
+    context = {
+        # 'departments': departments,
+        'tasks': tasks
+    }
+
+    return render(request, 'manager_dashboard.html', context)
