@@ -1,9 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
-from .forms import CustomUserForm
-from .models import Department, Task
+from .forms import CustomUserForm, TaskForm, DepartmentForm
+from .models import Department, Task, CustomUser
+
+from .utils import fetch_users, fetch_tasks
 
 # Create your views here.
 def index(request):
@@ -50,15 +52,19 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-    if request.user.is_manager:
-        # Get all departments
-        departments = Department.objects.filter(manager=request.user)
-        tasks = Task.objects.filter(department__in=departments)
-    else:
-        tasks = Task.objects.filter(assignee=request.user)
+    # if request.user.is_manager:
+    #     # Get all departments
+    #     departments = Department.objects.filter(manager=request.user)
+    #     tasks = Task.objects.filter(department__in=departments)
+    # else:
+    #     tasks = Task.objects.filter(assignee=request.user)
+
+    users = fetch_users()
+    tasks = fetch_tasks()
     
     context = {
         # 'departments': departments,
+        'users': users,
         'tasks': tasks
     }
 
@@ -87,54 +93,144 @@ def summary_dashboard(request):
 # Task views
 @login_required
 def create_task(request):
-    pass
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.created_by = request.user
+            task.save()
+            return redirect('dashboard')
+    else:
+        form = TaskForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'create_task.html', context)
+
 
 
 @login_required
 def update_task(request, task_id):
-    pass
+    task = get_object_or_404(Task, pk=task_id)
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = TaskForm(instance=task)
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'edit_task.html', context)
 
 
 @login_required
 def delete_task(request, task_id):
-    pass
+    task = get_object_or_404(Task, pk=task_id)
+
+    if request.method == 'POST':
+        task.delete()
+        return redirect('dashboard')
+    
+    context = {
+        'task': task
+    }
+
+    return render(request, 'delete_task.html', context)
 
 
 # Department views
 @login_required
 def create_department(request):
-    pass
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST)
 
+        if form.is_valid():
+            department = form.save(commit=False)
+            department.manager = request.user
+            department.save()
+            return redirect('dashboard')
+        
+    else:
+        form = DepartmentForm()
 
-@login_required
-def update_department(request, department_id):
-    pass
+    context = {
+        'form': form
+    }
+
+    return render(request, 'create_department.html', context)
 
 
 @login_required
 def edit_department(request, department_id):
-    pass   
+    department = get_object_or_404(Department, id=department_id)
+
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST, instance=department)
+
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+        
+    else:
+        form = DepartmentForm(instance=department)
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'edit_department.html', context)
 
 
 @login_required
 def delete_department(request, department_id):
-    pass
+    department = get_object_or_404(Department, id=department_id)
+
+    if request.method == 'POST':
+        department.delete()
+        return redirect('dashboard')
+    
+    context = {
+        'department': department
+    }
+
+    return render(request, 'delete_department.html', context)
 
 
 # User views
 @login_required
 def manage_employees(request):
-    pass
+    if request.user.is_manager:
+        employees = CustomUser.objects.filter(is_manager=False, department__in=request.user)
+
+        return render(request, 'manage_employees.html', {'employees': employees})
+    
+    return redirect('dashboard')
 
 
 @login_required
 def move_employee(request, employee_id, new_department_id):
-    pass
+    employee = get_object_or_404(CustomUser, id=employee_id)
+    new_department = get_object_or_404(Department, id=new_department_id)
+    employee.department = new_department
+    employee.save()
+    
+    return redirect('manage_employees')
 
 
 @login_required
 def remove_employee(request, employee_id):
-    pass
+    employee = get_object_or_404(CustomUser, id=employee_id)
+    employee.delete()
+    return redirect('manage_employees')
 
 
 
