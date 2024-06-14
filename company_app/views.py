@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .forms import CustomUserForm, TaskForm, DepartmentForm
-from .models import Department, Task
+from .models import Department, Task, CustomUser
 
 # Create your views here.
 def index(request):
@@ -202,17 +202,29 @@ def delete_department(request, department_id):
 # User views
 @login_required
 def manage_employees(request):
-    pass
+    if request.user.is_manager:
+        employees = CustomUser.objects.filter(is_manager=False, department__in=request.user)
+
+        return render(request, 'manage_employees.html', {'employees': employees})
+    
+    return redirect('dashboard')
 
 
 @login_required
 def move_employee(request, employee_id, new_department_id):
-    pass
+    employee = get_object_or_404(CustomUser, id=employee_id)
+    new_department = get_object_or_404(Department, id=new_department_id)
+    employee.department = new_department
+    employee.save()
+    
+    return redirect('manage_employees')
 
 
 @login_required
 def remove_employee(request, employee_id):
-    pass
+    employee = get_object_or_404(CustomUser, id=employee_id)
+    employee.delete()
+    return redirect('manage_employees')
 
 
 
