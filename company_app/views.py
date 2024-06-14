@@ -1,8 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
-from .forms import CustomUserForm
+from .forms import CustomUserForm, TaskForm, DepartmentForm
 from .models import Department, Task
 
 # Create your views here.
@@ -87,17 +87,58 @@ def summary_dashboard(request):
 # Task views
 @login_required
 def create_task(request):
-    pass
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.created_by = request.user
+            task.save()
+            return redirect('dashboard')
+    else:
+        form = TaskForm()
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'create_task.html', context)
+
 
 
 @login_required
 def update_task(request, task_id):
-    pass
+    task = get_object_or_404(Task, pk=task_id)
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+    else:
+        form = TaskForm(instance=task)
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'edit_task.html', context)
 
 
 @login_required
 def delete_task(request, task_id):
-    pass
+    task = get_object_or_404(Task, pk=task_id)
+
+    if request.method == 'POST':
+        task.delete()
+        return redirect('dashboard')
+    
+    context = {
+        'task': task
+    }
+
+    return render(request, 'delete_task.html', context)
 
 
 # Department views
