@@ -5,6 +5,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CustomUserForm, TaskForm, DepartmentForm
 from .models import Department, Task, CustomUser
 
+from .utils import fetch_users, fetch_tasks
+
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
@@ -50,15 +52,19 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-    if request.user.is_manager:
-        # Get all departments
-        departments = Department.objects.filter(manager=request.user)
-        tasks = Task.objects.filter(department__in=departments)
-    else:
-        tasks = Task.objects.filter(assignee=request.user)
+    # if request.user.is_manager:
+    #     # Get all departments
+    #     departments = Department.objects.filter(manager=request.user)
+    #     tasks = Task.objects.filter(department__in=departments)
+    # else:
+    #     tasks = Task.objects.filter(assignee=request.user)
+
+    users = fetch_users()
+    tasks = fetch_tasks()
     
     context = {
         # 'departments': departments,
+        'users': users,
         'tasks': tasks
     }
 
