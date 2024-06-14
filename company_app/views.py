@@ -144,22 +144,59 @@ def delete_task(request, task_id):
 # Department views
 @login_required
 def create_department(request):
-    pass
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST)
 
+        if form.is_valid():
+            department = form.save(commit=False)
+            department.manager = request.user
+            department.save()
+            return redirect('dashboard')
+        
+    else:
+        form = DepartmentForm()
 
-@login_required
-def update_department(request, department_id):
-    pass
+    context = {
+        'form': form
+    }
+
+    return render(request, 'create_department.html', context)
 
 
 @login_required
 def edit_department(request, department_id):
-    pass   
+    department = get_object_or_404(Department, id=department_id)
+
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST, instance=department)
+
+        if form.is_valid():
+            form.save()
+            return redirect('dashboard')
+        
+    else:
+        form = DepartmentForm(instance=department)
+
+    context = {
+        'form': form
+    }
+
+    return render(request, 'edit_department.html', context)
 
 
 @login_required
 def delete_department(request, department_id):
-    pass
+    department = get_object_or_404(Department, id=department_id)
+
+    if request.method == 'POST':
+        department.delete()
+        return redirect('dashboard')
+    
+    context = {
+        'department': department
+    }
+
+    return render(request, 'delete_department.html', context)
 
 
 # User views
