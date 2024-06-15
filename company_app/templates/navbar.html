@@ -1,54 +1,59 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="{% url 'index'%}">Staff Management Sys</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-                <a class="nav-link" aria-current="page" href="{% url 'dashboard' %}">Dashboard</a>
-            </li>
-
-            <li class="nav-item">
-              <a class="nav-link active" href="{% url 'summary_dashboard' %}">Summary Dashboard</a>
-            </li>
-          {% if request.user.is_authenticated %}
-          <!-- Tasks Dropdown -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="{% url 'create_task'%}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Tasks
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-          </li>
-
-          <!-- Department Dropdown -->
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="{% url 'create_department'%}role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Department
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-          </li>
-
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="{% url 'index' %}">Your Company Name</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a href="{% url 'manage_employees'%}" class="nav-link" aria-disabled="false">Staff Management</a>
+              <a class="nav-link" href="{% url 'index' %}">Home</a>
           </li>
-        </ul>
-        <a class="btn btn-primary" href="{% url 'logout' %}" role="button">Logout</a>
-       {% else %}
-       <a class="btn btn-primary" href="{% url 'signup' %}" role="button">Sign Up</a>
-       <a class="btn btn-primary" href="{% url 'login' %}" role="button">Login</a>
-       {% endif%}
-      </div>
-    </div>
-  </nav>
+          <!-- Common links for both employees and managers -->
+          {% if user.is_authenticated %}
+              {% if user.is_manager %}
+                  <!-- Links specific to managers -->
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'manager_dashboard' %}">Dashboard</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'create_department' %}">Create Department</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'create_task' %}">Create Task</a>
+                  </li>
+              {% else %}
+                  <!-- Links specific to employees -->
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'employee_dashboard' %}">Dashboard</a>
+                  </li>
+              {% endif %}
+          {% endif %}
+      </ul>
+      <!-- Authentication buttons -->
+      <ul class="navbar-nav">
+          {% if user.is_authenticated %}
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+              </li>
+          {% else %}
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'login' %}">Login</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+              </li>
+          {% endif %}
+      </ul>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  {% block content %}
+  {% endblock %}
+</div>
+
+<!-- Bootstrap JS and any additional scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

@@ -10,7 +10,6 @@ django-bootstrap4 = "*"
 django-crontab = "*"
 python-dateutil = "*"
 requests = "*"
-django-widget-tweaks = "*"
 
 [dev-packages]
 
