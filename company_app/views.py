@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 
 from .forms import CustomUserForm, TaskForm, DepartmentForm
 from .models import Department, Task, CustomUser
@@ -49,22 +51,53 @@ def user_logout(request):
     logout(request)
     return redirect('index')
 
+@login_required
+def employee_dashboard(request):
+    user = request.user
+    tasks = Task.objects.filter(assignee=user)
+
+    # Filter by task status
+    status_filter = request.GET.get('status')
+
+    if status_filter in ['Done', 'In Progress']:
+        tasks = tasks.filter(status=status_filter)
+
+    # Pagination
+    paginator = Paginator(tasks, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'tasks': page_obj,
+        'user': user,
+        'status_filter': status_filter
+    }
+
+    return render(request, 'employee_dashboard.html', context)
+
 
 @login_required
-def dashboard(request):
-    # if request.user.is_manager:
-    #     # Get all departments
-    #     departments = Department.objects.filter(manager=request.user)
-    #     tasks = Task.objects.filter(department__in=departments)
-    # else:
-    #     tasks = Task.objects.filter(assignee=request.user)
+def update_task_status(request, task_id):
+    task = get_object_or_404(Task, id=task_id, assignee=request.user)
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in dict(Task.STATUS_CHOICES).keys():
+            task.status = new_status
+            task.save()
+    return redirect(reverse('employee_dashboard'))
 
-    users = fetch_users()
-    tasks = fetch_tasks()
+
+@login_required
+def manager_dashboard(request):
+    if request.user.is_manager:
+        # Get all departments
+        departments = Department.objects.filter(manager=request.user)
+        tasks = Task.objects.filter(department__in=departments)
+    else:
+        tasks = Task.objects.filter(assignee=request.user)
     
     context = {
         # 'departments': departments,
-        'users': users,
         'tasks': tasks
     }
 
@@ -72,6 +105,10 @@ def dashboard(request):
 
 @login_required
 def summary_dashboard(request):
+
+    users = fetch_users()
+    tasks = fetch_tasks()
+
     if request.user.is_manager:
         departments = Department.objects.filter(manager=request.user)
         total_tasks = Task.objects.filter(department__in=departments).count()

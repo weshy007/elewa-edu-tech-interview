@@ -5,7 +5,7 @@ from django.utils import timezone
 
 # Create your models here.
 class CustomUser(AbstractUser):
-    is_manager = models.BooleanField(default=False)
+    department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True)
 
 
 class Department(models.Model):
@@ -35,7 +35,7 @@ class Task(models.Model):
     description = models.TextField()
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='department_tasks')
     assignee = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='assignee_tasks')
-    status = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Not Started')
     due_date = models.DateTimeField(default=timezone.now)
     recurring = models.CharField(max_length=10, choices=RECURRING_CHOICES, default='None')
 

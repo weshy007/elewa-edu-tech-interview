@@ -8,7 +8,10 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path('signup/', views.signup, name='signup'),
 
-    path('dashboard/', views.dashboard, name='dashboard'),
+    path('employee_dashboard/', views.employee_dashboard, name='employee_dashboard'),
+    path('update_task_status/<int:task_id>/', views.update_task_status, name='update_task_status'),
+    
+    path('dashboard/', views.manager_dashboard, name='dashboard'),
     path('summary_dashboard/', views.summary_dashboard, name='summary_dashboard'),
 
     path('task/create/', views.create_task, name='create_task'),

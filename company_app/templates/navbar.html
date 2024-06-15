@@ -1,5 +1,3 @@
-{% load bootstrap4 %}
-
 <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
       <a class="navbar-brand" href="{% url 'index'%}">Staff Management Sys</a>
@@ -48,7 +46,7 @@
         </ul>
         <a class="btn btn-primary" href="{% url 'logout' %}" role="button">Logout</a>
        {% else %}
-       <a class="btn btn-primary" href="{% url 'register' %}" role="button">Sign Up</a>
+       <a class="btn btn-primary" href="{% url 'signup' %}" role="button">Sign Up</a>
        <a class="btn btn-primary" href="{% url 'login' %}" role="button">Login</a>
        {% endif%}
       </div>
