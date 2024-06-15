@@ -1,0 +1,59 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="{% url 'index' %}">Your Company Name</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+          aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+              <a class="nav-link" href="{% url 'index' %}">Home</a>
+          </li>
+          <!-- Common links for both employees and managers -->
+          {% if user.is_authenticated %}
+              {% if user.is_manager %}
+                  <!-- Links specific to managers -->
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'manager_dashboard' %}">Dashboard</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'create_department' %}">Create Department</a>
+                  </li>
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'create_task' %}">Create Task</a>
+                  </li>
+              {% else %}
+                  <!-- Links specific to employees -->
+                  <li class="nav-item">
+                      <a class="nav-link" href="{% url 'employee_dashboard' %}">Dashboard</a>
+                  </li>
+              {% endif %}
+          {% endif %}
+      </ul>
+      <!-- Authentication buttons -->
+      <ul class="navbar-nav">
+          {% if user.is_authenticated %}
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+              </li>
+          {% else %}
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'login' %}">Login</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="{% url 'signup' %}">Sign Up</a>
+              </li>
+          {% endif %}
+      </ul>
+  </div>
+</nav>
+
+<div class="container mt-4">
+  {% block content %}
+  {% endblock %}
+</div>
+
+<!-- Bootstrap JS and any additional scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

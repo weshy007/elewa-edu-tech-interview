@@ -2,20 +2,59 @@
 
 {% block content %}
 
-<h1>Dashboard</h1>
+<!-- manager_dashboard.html -->
+<div class="container mt-5">
+    <h1 class="mb-4">Manager Dashboard</h1>
     
-<h2>Users</h2>
-<ul>
-    {% for user in users %}
-        <li>{{ user.name }} ({{ user.email }})</li>
-    {% endfor %}
-</ul>
+    <!-- Department Section -->
+    <h2 class="mb-4">Departments</h2>
+    <form method="post" action="{% url 'create_department' %}">
+        {% csrf_token %}
+        {{ department_form.as_p }}
+        <button type="submit" class="btn btn-primary">Create Department</button>
+    </form>
 
-<h2>Tasks</h2>
-<ul>
-    {% for task in tasks %}
-        <li>{{ task.title }} - {{ task.completed|yesno:"Completed,Not Started" }}</li>
-    {% endfor %}
-</ul>
+    <!-- Task Section -->
+    <h2 class="mb-4">Tasks</h2>
+    <form method="post" action="{% url 'create_task' %}">
+        {% csrf_token %}
+        {{ task_form.as_p }}
+        <button type="submit" class="btn btn-primary">Create Task</button>
+    </form>
+
+    <!-- Employee Search Section -->
+    <h2 class="mb-4">Employees</h2>
+    <form method="get" id="employee-search-form">
+        {{ search_form.as_p }}
+    </form>
+    <ul id="employee-search-results" class="list-group mt-3"></ul>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#employee-search-form input[name="query"]').on('input', function() {
+                var query = $(this).val();
+                if (query.length >= 3) {
+                    $.ajax({
+                        url: '{% url "search_employees" %}',
+                        data: {'query': query},
+                        success: function(data) {
+                            var results = data.results;
+                            var $resultsList = $('#employee-search-results');
+                            $resultsList.empty();
+                            for (var i = 0; i < results.length; i++) {
+                                var employee = results[i];
+                                var $li = $('<li class="list-group-item"></li>').text(employee.username);
+                                $resultsList.append($li);
+                            }
+                        }
+                    });
+                } else {
+                    $('#employee-search-results').empty();
+                }
+            });
+        });
+    </script>
+</div>
 
 {% endblock %}

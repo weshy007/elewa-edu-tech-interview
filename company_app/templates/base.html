@@ -1,5 +1,6 @@
 {% load static %}
 {% load bootstrap4 %}
+{% load form_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -10,33 +11,16 @@
     <title>Elewa Ed</title>
 </head>
 <body class="container">
-
-    <header>
-        <nav>
-            <ul>
-                <li><a href="{% url 'index' %}">Home</a></li>
-                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                <li><a href="{% url 'summary_dashboard' %}">Summary Dashboard</a></li>
-
-                {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}">Logout</a>
-                {% else %}
-                    <a href="{% url 'login' %}">Login</a> or
-                    <a href="{% url 'signup' %}">Sign Up</a>
-                {% endif %}
-
-            </ul>
-        </nav>
-    </header>
-
-    <main>
+        {% include 'navbar.html' %}
         {% block content %}
-        {% endblock %}
-    </main>
+        <!--  -->
+        {% endblock content %}
 
-    <footer>
+        
+    </body>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <footer class="container">
         <p>&copy; 2024 Elewa Ed</p>
     </footer>
-    
-</body>
 </html>

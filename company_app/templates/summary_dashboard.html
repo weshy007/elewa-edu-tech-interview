@@ -1,17 +1,40 @@
+<!-- manager_dashboard.html -->
 {% extends 'base.html' %}
 
+
 {% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Manager Dashboard</h1>
 
-<h1>Summary Dashboard</h1>
-    <p>Total Tasks: {{ total_tasks }}</p>
-    <p>Completed Tasks: {{ completed_tasks }}</p>
-    <p>Pending Tasks: {{ pending_tasks }}</p>
-    <p>Task Completion Rate: {{ task_completion_rate }}%</p>
-    <h2>Departments</h2>
-    <ul>
-        {% for department in departments %}
-            <li>{{ department.name }}</li>
-        {% endfor %}
-    </ul>
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Overall Task Completion Rate</h5>
+            <p class="card-text">{{ overall_completion_rate }}%</p>
+        </div>
+    </div>
 
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Departmental Performances</h5>
+            <ul class="list-group">
+                {% for performance in department_performances %}
+                    <li class="list-group-item">
+                        <strong>{{ performance.department.name }}</strong><br>
+                        Completion Rate: {{ performance.completion_rate }}%<br>
+                        Total Tasks: {{ performance.total_tasks }}<br>
+                        Completed Tasks: {{ performance.completed_tasks }}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Pending Tasks</h5>
+            <p class="card-text">{{ pending_tasks }}</p>
+        </div>
+    </div>
+
+</div>
 {% endblock %}
