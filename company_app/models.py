@@ -7,6 +7,10 @@ from django.utils import timezone
 class CustomUser(AbstractUser):
     department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True)
 
+    @property
+    def is_manager(self):
+        return Department.objects.filter(manager=self).exists()
+
 
 class Department(models.Model):
     name = models.CharField(max_length=100)

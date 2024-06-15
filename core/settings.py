@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     'bootstrap4',
     'django_crontab',
+    'widget_tweaks',
 
     'company_app',
 ]
@@ -81,6 +82,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries':  {
+                'add_class': 'company_app.templatetags.form_tags',
+            }
         },
     },
 ]

@@ -1,10 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
-from .forms import CustomUserForm, TaskForm, DepartmentForm
+from .forms import CustomUserForm, TaskForm, DepartmentForm, EmployeeSearchForm
 from .models import Department, Task, CustomUser
 
 from .utils import fetch_users, fetch_tasks
@@ -51,6 +52,10 @@ def user_logout(request):
     logout(request)
     return redirect('index')
 
+
+"""
+Employee Dashboard views - employee_dashboard, update_task_status
+"""
 @login_required
 def employee_dashboard(request):
     user = request.user
@@ -85,6 +90,112 @@ def update_task_status(request, task_id):
             task.status = new_status
             task.save()
     return redirect(reverse('employee_dashboard'))
+
+
+"""
+Manager Dashboard views 
+- manager_dashboard, 
+- create_department, create_task, 
+- update_task, delete_task, 
+- remove_employee, 
+-search_employees    
+"""
+def is_manager(user):
+    return user.is_authenticated and user.is_manager
+
+
+@login_required
+def manager_dashboard(request):
+    departments = Department.objects.all()
+    tasks = Task.objects.all()
+    employees = CustomUser.objects.all()
+    department_form = DepartmentForm()
+    task_form = TaskForm()
+    search_form = EmployeeSearchForm()
+
+    context = {
+        'departments': departments,
+        'tasks': tasks,
+        'employees': employees,
+        'department_form': department_form,
+        'task_form': task_form,
+        'search_form': search_form
+    }
+
+    return render(request, 'manager_dashboard.html', context)
+
+
+@login_required
+@user_passes_test(is_manager)
+def create_department(request):
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect('manager_dashboard')
+        
+    return redirect('manager_dashboard')
+
+
+@login_required
+@user_passes_test(is_manager)
+def create_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+
+        if form.is_valid():
+            form.save()
+            return redirect('manager_dashboard')
+        
+    return redirect('manager_dashboard')
+
+
+@login_required
+@user_passes_test(is_manager)
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+
+        if form.is_valid():
+            form.save()
+            return redirect('manager_dashboard')
+        
+    return redirect('manager_dashboard')
+
+
+@login_required
+@user_passes_test(is_manager)
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == 'POST':
+        task.delete()
+        return redirect('manager_dashboard')
+    
+    
+@login_required
+@user_passes_test(is_manager)
+def remove_employee(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    user.delete()
+    return redirect('manager_dashboard')
+
+
+@login_required
+@user_passes_test(is_manager)
+def search_employees(request):
+    if request.is_ajax():
+        query = request.GET.get('query', '')
+        
+        if len(query) >= 3:
+            employees = CustomUser.objects.filter(username__icontains=query)
+            results = [{'id': emp.id, 'username': emp.username} for emp in employees]
+            return JsonResponse({'results': results})
+    return JsonResponse({'results': []})
+    
 
 
 @login_required
