@@ -1,12 +1,13 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
-from .forms import CustomUserForm, TaskForm, DepartmentForm, EmployeeSearchForm
+from .forms import *
 from .models import Department, Task, CustomUser
 
 from .utils import fetch_users, fetch_tasks
@@ -16,38 +17,41 @@ def index(request):
     return render(request, 'index.html')
 
 
-def signup(request):
-    if request.method == 'POST':
-        form = CustomUserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            # TODO: Redirect to the dashboard page
-            return redirect('index')
-    else:
-        form = CustomUserForm()
-
-    context = {
-        'form': form
-    }
-        
-    return render(request, 'signup.html', context)
-
-
 def user_login(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        
-        user = authenticate(username=username, password=password)  
-
-        redirect('index')
-
-        if user is not None:
+        form = LoginForm(request, request.POST)
+        if form.is_valid():
+            user = form.get_user()
             login(request, user)
-            return redirect('index')
-    return render(request, 'login.html')
+            if user.is_manager:  # If the user is a manager
+                return redirect('manager_dashboard')
+            else:  # If the user is a normal user
+                return redirect('employee_dashboard')
+    else:
+        form = LoginForm()
 
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'login.html', context)
+
+
+def register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # login(request, user)
+            return redirect('login')
+    else:
+        form = RegistrationForm()
+
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'signup.html', context)
 
 def user_logout(request):
     logout(request)
@@ -114,6 +118,26 @@ def manager_dashboard(request):
     task_form = TaskForm()
     search_form = EmployeeSearchForm()
 
+    # Pagination for departments
+    departments_paginator = Paginator(departments, 10)
+    page_number = request.GET.get('departments_page')
+    try:
+        departments = departments_paginator.page(page_number)
+    except PageNotAnInteger:
+        departments = departments_paginator.page(1)
+    except EmptyPage:
+        departments = departments_paginator.page(departments_paginator.num_pages)
+    
+    # Pagination for tasks
+    tasks_paginator = Paginator(tasks, 10)
+    page_number = request.GET.get('tasks_page')
+    try:
+        tasks = tasks_paginator.page(page_number)
+    except PageNotAnInteger:
+        tasks = tasks_paginator.page(1)
+    except EmptyPage:
+        tasks = tasks_paginator.page(tasks_paginator.num_pages)
+
     context = {
         'departments': departments,
         'tasks': tasks,
@@ -126,31 +150,36 @@ def manager_dashboard(request):
     return render(request, 'manager_dashboard.html', context)
 
 
+import logging
+logger = logging.getLogger(__name__)
+
 @login_required
 @user_passes_test(is_manager)
 def create_department(request):
     if request.method == 'POST':
         form = DepartmentForm(request.POST)
-
         if form.is_valid():
+            # Process form data
             form.save()
             return redirect('manager_dashboard')
-        
-    return redirect('manager_dashboard')
+    else:
+        # Provide initial data for manager field
+        form = DepartmentForm(initial={'manager': request.user})  # Assuming manager field relates to current user
 
+    return render(request, 'create_department.html', {'form': form})
 
 @login_required
 @user_passes_test(is_manager)
 def create_task(request):
     if request.method == 'POST':
         form = TaskForm(request.POST)
-
         if form.is_valid():
             form.save()
             return redirect('manager_dashboard')
-        
-    return redirect('manager_dashboard')
-
+    else:
+        form = TaskForm()
+    
+    return render(request, 'create_task.html', {'form': form})
 
 @login_required
 @user_passes_test(is_manager)
