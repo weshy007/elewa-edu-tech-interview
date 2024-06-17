@@ -268,34 +268,24 @@ def manager_dashboard(request):
 @login_required
 @user_passes_test(is_manager)
 def summary_dashboard(request):
-    # Calculate overall task completion rates
-    total_tasks = Task.objects.count()
-    completed_tasks = Task.objects.filter(status='completed').count()
-    overall_completion_rate = (completed_tasks / total_tasks) * 100 if total_tasks > 0 else 0
+     # Fetching task counts by status
+    completed_tasks_count = Task.objects.filter(status='Completed').count()
+    ongoing_tasks_count = Task.objects.filter(status='Ongoing').count()
+    pending_tasks_count = Task.objects.filter(status='Not Started').count()
 
-    # Calculate departmental performances
+    # Fetching departmental task performance
     departments = Department.objects.all()
-    department_performances = []
-    for department in departments:
-        department_tasks = Task.objects.filter(department=department)
-        total_department_tasks = department_tasks.count()
-        completed_department_tasks = department_tasks.filter(status='completed').count()
-        department_completion_rate = (completed_department_tasks / total_department_tasks) * 100 if total_department_tasks > 0 else 0
-        department_performances.append({
-            'department': department,
-            'completion_rate': department_completion_rate,
-            'total_tasks': total_department_tasks,
-            'completed_tasks': completed_department_tasks
-        })
 
-    # Calculate pending tasks (not started or ongoing)
-    pending_tasks = Task.objects.filter(Q(status='not_started') | Q(status='ongoing')).count()
+    # Fetching pending tasks list
+    pending_tasks = Task.objects.filter(status='Not Started')
 
     context = {
-        'overall_completion_rate': overall_completion_rate,
-        'department_performances': department_performances,
+        'completed_tasks_count': completed_tasks_count,
+        'ongoing_tasks_count': ongoing_tasks_count,
+        'pending_tasks_count': pending_tasks_count,
+        'departments': departments,
         'pending_tasks': pending_tasks,
     }
 
-    return render(request, 'manager_dashboard.html', context)
+    return render(request, 'summary_dashboard.html', context)
 

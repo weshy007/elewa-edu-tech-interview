@@ -13,7 +13,7 @@ urlpatterns = [
     path('update_task_status/<int:task_id>/', views.update_task_status, name='update_task_status'),
 
     path('manager/dashboard/', views.manager_dashboard, name='manager_dashboard'),
-    path('summary_dashboard/', views.summary_dashboard, name='summary_dashboard'),
+    path('manager/summary_dashboard/', views.summary_dashboard, name='summary_dashboard'),
 
     path('manager/create_department/', views.create_department, name='create_department'),
     path('manager/create_task/', views.create_task, name='create_task'),

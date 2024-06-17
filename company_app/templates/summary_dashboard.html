@@ -1,40 +1,100 @@
-<!-- manager_dashboard.html -->
+<!-- templates/manager_summary_dashboard.html -->
 {% extends 'base.html' %}
 
-
 {% block content %}
-<div class="container mt-5">
-    <h1 class="mb-4">Manager Dashboard</h1>
 
+<div class="container mt-5">
+    <h1 class="mb-4">Manager Summary Dashboard</h1>
+
+    <!-- Task Completion Rates -->
     <div class="card mb-4">
+        <div class="card-header">
+            Task Completion Rates
+        </div>
         <div class="card-body">
-            <h5 class="card-title">Overall Task Completion Rate</h5>
-            <p class="card-text">{{ overall_completion_rate }}%</p>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="card text-white bg-success mb-3">
+                        <div class="card-header">Completed Tasks</div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ completed_tasks_count }}</h5>
+                            <p class="card-text">Tasks completed successfully.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card text-white bg-info mb-3">
+                        <div class="card-header">Ongoing Tasks</div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ ongoing_tasks_count }}</h5>
+                            <p class="card-text">Tasks currently in progress.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="card text-white bg-secondary mb-3">
+                        <div class="card-header">Pending Tasks</div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ pending_tasks_count }}</h5>
+                            <p class="card-text">Tasks pending completion.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Departmental Performance -->
     <div class="card mb-4">
+        <div class="card-header">
+            Departmental Performance
+        </div>
         <div class="card-body">
-            <h5 class="card-title">Departmental Performances</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Department</th>
+                            <th>Completed Tasks</th>
+                            <th>Ongoing Tasks</th>
+                            <th>Pending Tasks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for department in departments %}
+                        <tr>
+                            <td>{{ department.name }}</td>
+                            <td>{{ department.completed_tasks }}</td>
+                            <td>{{ department.ongoing_tasks }}</td>
+                            <td>{{ department.pending_tasks }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Tasks List -->
+    <div class="card mb-4">
+        <div class="card-header">
+            Pending Tasks List
+        </div>
+        <div class="card-body">
             <ul class="list-group">
-                {% for performance in department_performances %}
-                    <li class="list-group-item">
-                        <strong>{{ performance.department.name }}</strong><br>
-                        Completion Rate: {{ performance.completion_rate }}%<br>
-                        Total Tasks: {{ performance.total_tasks }}<br>
-                        Completed Tasks: {{ performance.completed_tasks }}
-                    </li>
+                {% for task in pending_tasks %}
+                <li class="list-group-item">
+                    <h5>{{ task.title }}</h5>
+                    <p>{{ task.description }}</p>
+                    <p><strong>Status:</strong> {{ task.status }}</p>
+                    <p><strong>Due Date:</strong> {{ task.due_date }}</p>
+                    <p><strong>Assignee:</strong> {{ task.assignee }}</p>
+                </li>
                 {% endfor %}
             </ul>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Pending Tasks</h5>
-            <p class="card-text">{{ pending_tasks }}</p>
-        </div>
-    </div>
-
 </div>
+
 {% endblock %}
