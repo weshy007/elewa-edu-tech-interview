@@ -1,10 +1,10 @@
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
 from django.urls import reverse
 
 from .forms import *
@@ -150,9 +150,6 @@ def manager_dashboard(request):
     return render(request, 'manager_dashboard.html', context)
 
 
-import logging
-logger = logging.getLogger(__name__)
-
 @login_required
 @user_passes_test(is_manager)
 def create_department(request):
@@ -188,12 +185,13 @@ def edit_task(request, task_id):
 
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=task)
-
         if form.is_valid():
             form.save()
             return redirect('manager_dashboard')
-        
-    return redirect('manager_dashboard')
+    else:
+        form = TaskForm(instance=task)
+
+    return render(request, 'edit_task.html', {'form': form, 'task': task})
 
 
 @login_required

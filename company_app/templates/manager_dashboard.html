@@ -1,60 +1,65 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-
-<!-- manager_dashboard.html -->
 <div class="container mt-5">
     <h1 class="mb-4">Manager Dashboard</h1>
-    
-    <!-- Department Section -->
-    <h2 class="mb-4">Departments</h2>
-    <form method="post" action="{% url 'create_department' %}">
-        {% csrf_token %}
-        {{ department_form.as_p }}
-        <button type="submit" class="btn btn-primary">Create Department</button>
-    </form>
+    <div class="card-body">
+        <h5 class="card-title">Name: {{ user.first_name }} {{ user.last_name }}</h5>
+        <p class="card-text"><strong>Email:</strong> {{ user.email }}</p>
+    </div>
 
     <!-- Task Section -->
     <h2 class="mb-4">Tasks</h2>
-    <form method="post" action="{% url 'create_task' %}">
-        {% csrf_token %}
-        {{ task_form.as_p }}
-        <button type="submit" class="btn btn-primary">Create Task</button>
-    </form>
-
-    <!-- Employee Search Section -->
-    <h2 class="mb-4">Employees</h2>
-    <form method="get" id="employee-search-form">
-        {{ search_form.as_p }}
-    </form>
-    <ul id="employee-search-results" class="list-group mt-3"></ul>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#employee-search-form input[name="query"]').on('input', function() {
-                var query = $(this).val();
-                if (query.length >= 3) {
-                    $.ajax({
-                        url: '{% url "search_employees" %}',
-                        data: {'query': query},
-                        success: function(data) {
-                            var results = data.results;
-                            var $resultsList = $('#employee-search-results');
-                            $resultsList.empty();
-                            for (var i = 0; i < results.length; i++) {
-                                var employee = results[i];
-                                var $li = $('<li class="list-group-item"></li>').text(employee.username);
-                                $resultsList.append($li);
-                            }
-                        }
-                    });
-                } else {
-                    $('#employee-search-results').empty();
-                }
-            });
-        });
-    </script>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Title</th>
+                <th scope="col">Assignee</th>
+                <th scope="col">Status</th>
+                <th scope="col">Due Date</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td>{{ task.title }}</td>
+                <td>{{ task.assignee.username }}</td>
+                <td>{{ task.get_status_display }}</td>
+                <td>{{ task.due_date }}</td>
+                <td>
+                    <a href="{% url 'edit_task' task.id %}" class="btn btn-secondary btn-sm">Edit</a>
+                    <form method="post" action="{% url 'delete_task' task.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if tasks.has_other_pages %}
+    <nav aria-label="Tasks Pagination">
+        <ul class="pagination">
+            {% if tasks.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?tasks_page={{ tasks.previous_page_number }}">Previous</a>
+            </li>
+            {% endif %}
+            {% for i in tasks.paginator.page_range %}
+            <li class="page-item {% if tasks.number == i %}active{% endif %}">
+                <a class="page-link" href="?tasks_page={{ i }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+            {% if tasks.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?tasks_page={{ tasks.next_page_number }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 </div>
 
 {% endblock %}
