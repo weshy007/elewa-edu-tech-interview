@@ -14,55 +14,81 @@
     
     <h2 class="mb-4">Tasks</h2>
 
-    <form method="get" class="mb-3">
-        <div class="form-group">
-            <label for="status">Filter by Status</label>
-            <select name="status" id="status" class="form-control" onchange="this.form.submit()">
-                <option value="">All</option>
-                <option value="Not Started" {% if status_filter == 'Not Started' %}selected{% endif %}>Not Started</option>
-                <option value="Ongoing" {% if status_filter == 'Ongoing' %}selected{% endif %}>Ongoing</option>
-                <option value="Completed" {% if status_filter == 'Completed' %}selected{% endif %}>Completed</option>
-            </select>
-        </div>
-    </form>
-
-    <ul class="list-group">
-        {% for task in tasks %}
-            <li class="list-group-item">
-                <h5>{{ task.title }}</h5>
-                <p>{{ task.description }}</p>
-                <p><strong>Status:</strong> {{ task.status }}</p>
-                <p><strong>Due Date:</strong> {{ task.due_date }}</p>
-                <form method="post" action="{% url 'update_task_status' task.id %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="status_{{ task.id }}">Update Status</label>
-                        <select name="status" id="status_{{ task.id }}" class="form-control" onchange="this.form.submit()">
-                            <option value="Not Started" {% if task.status == 'Not Started' %}selected{% endif %}>Not Started</option>
-                            <option value="Ongoing" {% if task.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
-                            <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
-                        </select>
-                    </div>
-                </form>
-            </li>
-        {% endfor %}
-    </ul>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for task in tasks %}
+            <tr>
+                <td>
+                    <a href="#" data-toggle="modal" data-target="#taskModal_{{ task.id }}">{{ task.title }}</a>
+                </td>
+                <td>{{ task.due_date }}</td>
+                <td>
+                    <form method="post" action="{% url 'update_task_status' task.id %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <select name="status" class="form-control" onchange="this.form.submit()">
+                                <option value="Not Started" {% if task.status == 'Not Started' %}selected{% endif %}>Not Started</option>
+                                <option value="Ongoing" {% if task.status == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                                <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
+                            </select>
+                        </div>
+                    </form>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#taskModal_{{ task.id }}">Details</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <nav aria-label="Page navigation example" class="mt-4">
         <ul class="pagination">
             {% if tasks.has_previous %}
-                <li class="page-item"><a class="page-link" href="?page={{ tasks.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ tasks.previous_page_number }}">Previous</a></li>
             {% endif %}
             {% for num in tasks.paginator.page_range %}
-                <li class="page-item {% if tasks.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a></li>
+                <li class="page-item {% if tasks.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
             {% endfor %}
             {% if tasks.has_next %}
-                <li class="page-item"><a class="page-link" href="?page={{ tasks.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ tasks.next_page_number }}">Next</a></li>
             {% endif %}
         </ul>
     </nav>
 </div>
 
-{% endblock %}
+{% for task in tasks %}
+<!-- Modal for task details -->
+<div class="modal fade" id="taskModal_{{ task.id }}" tabindex="-1" role="dialog" aria-labelledby="taskModalLabel_{{ task.id }}" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taskModalLabel_{{ task.id }}">{{ task.title }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Description:</strong></p>
+                <p>{{ task.description }}</p>
+                <p><strong>Status:</strong> {{ task.status }}</p>
+                <p><strong>Due Date:</strong> {{ task.due_date }}</p>
+                <!-- Add other details as needed -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
-<!-- End of company_app/templates/employee_dashboard.html -->
+{% endblock %}
