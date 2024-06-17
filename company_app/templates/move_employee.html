@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Move Employee to Another Department</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="new_department">New Department</label>
+            <select name="new_department" class="form-control">
+                {% for department in departments %}
+                <option value="{{ department.id }}" {% if department.id == user.department_id %}selected{% endif %}>{{ department.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Move Employee</button>
+    </form>
+</div>
+{% endblock %}

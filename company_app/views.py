@@ -1,7 +1,9 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+from django.core.mail import send_mail
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -23,8 +25,8 @@ def register(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            messages.success(request, 'Registration successful.')
-            return redirect('login')  # Redirect to login after successful registration
+            messages.success(request, 'Registration successful. Please log in.')
+            return redirect('login')  # Redirect to login page after successful registration
         else:
             messages.error(request, 'Unsuccessful registration. Invalid information.')
     else:
@@ -56,6 +58,126 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('login')
+
+"""
+Manager Functions: 
+- manager_dashboard, 
+- create_department, create_task, 
+- update_task, delete_task, 
+- remove_employee, 
+-search_employees    
+"""
+def is_manager(user):
+    return user.is_manager
+
+
+@login_required
+@user_passes_test(is_manager)
+def create_department(request):
+    if request.method == 'POST':
+        form = DepartmentForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Department created successfully.')
+            return redirect('manager_dashboard')
+    else:
+        form = DepartmentForm()
+    
+    return render(request, 'create_department.html', {'form': form})
+
+@login_required
+@user_passes_test(is_manager)
+def create_task(request):
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            task = form.save()
+            send_task_assignment_email(task)
+            messages.success(request, 'Task created successfully.')
+            return redirect('manager_dashboard')
+    else:
+        form = TaskForm()
+    
+    return render(request, 'create_task.html', {'form': form})
+
+@login_required
+@user_passes_test(is_manager)
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    
+    if request.method == 'POST':
+        form = TaskForm(request.POST, instance=task)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Task updated successfully.')
+            return redirect('manager_dashboard')
+    else:
+        form = TaskForm(instance=task)
+    
+    return render(request, 'edit_task.html', {'form': form, 'task': task})
+
+@login_required
+@user_passes_test(is_manager)
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if request.method == 'POST':
+        task.delete()
+        messages.success(request, 'Task deleted successfully.')
+        return redirect('manager_dashboard')
+    
+    return render(request, 'delete_task.html', {'task': task})
+
+@login_required
+@user_passes_test(is_manager)
+def assign_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if request.method == 'POST':
+        assignee_id = request.POST.get('assignee')
+        if assignee_id:
+            task.assignee_id = assignee_id
+            task.save()
+            send_task_assignment_email(task)
+            messages.success(request, 'Task assigned successfully.')
+            return redirect('manager_dashboard')
+        else:
+            messages.error(request, 'Please select an assignee.')
+    
+    return render(request, 'assign_task.html', {'task': task})
+
+@login_required
+@user_passes_test(is_manager)
+def move_employee(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    if request.method == 'POST':
+        new_department_id = request.POST.get('new_department')
+        if new_department_id:
+            user.department_id = new_department_id
+            user.save()
+            messages.success(request, 'Employee moved to a new department successfully.')
+            return redirect('manager_dashboard')
+        else:
+            messages.error(request, 'Please select a department.')
+    
+    departments = Department.objects.all()
+    return render(request, 'move_employee.html', {'user': user, 'departments': departments})
+
+@login_required
+@user_passes_test(is_manager)
+def remove_employee(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
+    if request.method == 'POST':
+        user.delete()
+        messages.success(request, 'Employee removed from the organization successfully.')
+        return redirect('manager_dashboard')
+    
+    return render(request, 'remove_employee.html', {'user': user})
+
+def send_task_assignment_email(task):
+    subject = 'Task Assignment'
+    message = f'You have been assigned a new task: {task.title}.'
+    from_email = settings.DEFAULT_FROM_EMAIL
+    to_email = task.assignee.email
+    send_mail(subject, message, from_email, [to_email])
 
 
 """
@@ -97,14 +219,7 @@ def update_task_status(request, task_id):
     return redirect(reverse('employee_dashboard'))
 
 
-"""
-Manager Dashboard views 
-- manager_dashboard, 
-- create_department, create_task, 
-- update_task, delete_task, 
-- remove_employee, 
--search_employees    
-"""
+
 def is_manager(user):
     return user.is_authenticated and user.is_manager
 

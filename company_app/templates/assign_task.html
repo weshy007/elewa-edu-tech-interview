@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Assign Task</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="assignee">Assignee</label>
+            <select name="assignee" class="form-control">
+                {% for user in users %}
+                <option value="{{ user.id }}" {% if user.id == task.assignee_id %}selected{% endif %}>{{ user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Assign Task</button>
+    </form>
+</div>
+{% endblock %}

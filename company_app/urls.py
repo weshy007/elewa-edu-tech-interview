@@ -19,6 +19,10 @@ urlpatterns = [
     path('manager/create_task/', views.create_task, name='create_task'),
     path('manager/edit_task/<int:task_id>/', views.edit_task, name='edit_task'),
     path('manager/delete_task/<int:task_id>/', views.delete_task, name='delete_task'),
+    path('manager/move_employee/<int:user_id>/', views.move_employee, name='move_employee'),
+    path('manager/remove_employee/<int:user_id>/', views.remove_employee, name='remove_employee'),
+
+
     path('manager/remove_employee/<int:user_id>/', views.remove_employee, name='remove_employee'),
     path('manager/search_employees/', views.search_employees, name='search_employees'),
 ]
