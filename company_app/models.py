@@ -4,21 +4,22 @@ from django.utils import timezone
 
 
 # Create your models here.
-class CustomUser(AbstractUser):
-    department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True)
-
-    @property
-    def is_manager(self):
-        return Department.objects.filter(manager=self).exists()
-
-
 class Department(models.Model):
     name = models.CharField(max_length=100)
-    manager = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='department_manager')
+    manager = models.ForeignKey('CustomUser', on_delete=models.SET_NULL, null=True, related_name='department_manager')
 
     def __str__(self):
         return self.name
     
+
+class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)
+    is_manager = models.BooleanField(default=False)
+    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
+    
+    def __str__(self):
+        return self.username
+
 
 class Task(models.Model):
     STATUS_CHOICES = [

@@ -2,7 +2,58 @@
 
 
 {% block content %}
+<style>
+  body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+  }
+  .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 80px 20px;
+      text-align: center;
+  }
+  .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+  }
+  .btn-primary:hover {
+      background-color: #0069d9;
+      border-color: #0062cc;
+  }
+  .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #007bff;
+  }
+  .feature-description {
+      margin-bottom: 40px;
+  }
+</style>
+
 <div class="container">
-  <p>Welcome to ELEWA CMS</p>
+  <h1>Welcome to Our Task Management Platform</h1>
+  <p class="lead">Effortlessly manage tasks, departments, and team members.</p>
+  <div class="row">
+      <div class="col-md-4">
+          <span class="feature-icon">&#128202;</span>
+          <h3>Task Management</h3>
+          <p class="feature-description">Organize tasks, assign responsibilities, and track progress.</p>
+      </div>
+      <div class="col-md-4">
+          <span class="feature-icon">&#128101;</span>
+          <h3>Department Management</h3>
+          <p class="feature-description">Create departments, add members, and manage team structures.</p>
+      </div>
+      <div class="col-md-4">
+          <span class="feature-icon">&#128188;</span>
+          <h3>User Roles</h3>
+          <p class="feature-description">Assign manager roles, control access, and streamline workflows.</p>
+      </div>
+  </div>
+  <p class="mt-4">
+      <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Get Started</a>
+  </p>
 </div>
+
 {% endblock %}

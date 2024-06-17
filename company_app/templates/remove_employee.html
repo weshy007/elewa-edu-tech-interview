@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1>Delete Task</h1>
-    <p>Are you sure you want to delete "{{ task.title }}"?</p>
+    <h1>Remove Employee</h1>
+    <p>Are you sure you want to remove {{ user.username }} from the organization?</p>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Delete Task</button>
+        <button type="submit" class="btn btn-danger">Remove Employee</button>
         <a href="{% url 'manager_dashboard' %}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
