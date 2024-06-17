@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
@@ -17,45 +18,44 @@ def index(request):
     return render(request, 'index.html')
 
 
-def user_login(request):
-    if request.method == 'POST':
-        form = LoginForm(request, request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            if user.is_manager:  # If the user is a manager
-                return redirect('manager_dashboard')
-            else:  # If the user is a normal user
-                return redirect('employee_dashboard')
-    else:
-        form = LoginForm()
-
-    context = {
-        'form': form,
-    }
-
-    return render(request, 'login.html', context)
-
-
 def register(request):
     if request.method == 'POST':
-        form = RegistrationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # login(request, user)
-            return redirect('login')
+            messages.success(request, 'Registration successful.')
+            return redirect('login')  # Redirect to login after successful registration
+        else:
+            messages.error(request, 'Unsuccessful registration. Invalid information.')
     else:
-        form = RegistrationForm()
+        form = CustomUserCreationForm()
+    return render(request, 'signup.html', {'form': form})
 
-    context = {
-        'form': form,
-    }
 
-    return render(request, 'signup.html', context)
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        
+        if username and password:
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                if user.is_manager:
+                    return redirect('manager_dashboard')  # Redirect to manager dashboard if user is a manager
+                else:
+                    return redirect('employee_dashboard')  # Redirect to employee dashboard if user is a normal user
+            else:
+                messages.error(request, 'Invalid username or password.')
+        else:
+            messages.error(request, 'Please fill out both fields.')
+    return render(request, 'login.html')
 
+
+@login_required
 def user_logout(request):
     logout(request)
-    return redirect('index')
+    return redirect('login')
 
 
 """
