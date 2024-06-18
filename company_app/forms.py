@@ -24,9 +24,7 @@ class DepartmentForm(forms.ModelForm):
     class Meta:
         model = Department
         fields = ['name', 'manager']
-        widgets = {
-            'manager': forms.HiddenInput(),
-        }
+        
 
 class TaskForm(forms.ModelForm):
     class Meta:
