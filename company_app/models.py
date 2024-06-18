@@ -51,21 +51,3 @@ class Task(models.Model):
     def __str__(self):
         return self.title
     
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self.assignee:
-            self.send_assignment_email()
-
-    def send_assignment_email(self):
-        subject = 'You have been assigned a new task'
-        message = render_to_string('emails/task_assigned.html', {
-            'task': self,
-            'assignee': self.assignee,
-        })
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [self.assignee.email],
-            fail_silently=False,
-        )

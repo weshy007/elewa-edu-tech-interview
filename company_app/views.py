@@ -1,19 +1,13 @@
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.core.mail import send_mail
-from django.db.models import Q
-from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.template.loader import render_to_string
 from django.urls import reverse
 
 from .forms import *
 from .models import Department, Task, CustomUser
 
-from .utils import fetch_users, fetch_tasks
 
 # Create your views here.
 def index(request):
@@ -92,7 +86,7 @@ def create_task(request):
         form = TaskForm(request.POST)
         if form.is_valid():
             task = form.save()
-            send_task_assignment_email(task)
+            
             messages.success(request, 'Task created successfully.')
             return redirect('manager_dashboard')
     else:
@@ -136,7 +130,6 @@ def assign_task(request, task_id):
         if assignee_id:
             task.assignee_id = assignee_id
             task.save()
-            send_task_assignment_email(task)
             messages.success(request, 'Task assigned successfully.')
             return redirect('manager_dashboard')
         else:
@@ -172,12 +165,12 @@ def remove_employee(request, user_id):
     
     return render(request, 'remove_employee.html', {'user': user})
 
-def send_task_assignment_email(task):
-    subject = 'Task Assignment'
-    message = f'You have been assigned a new task: {task.title}.'
-    from_email = settings.DEFAULT_FROM_EMAIL
-    to_email = task.assignee.email
-    send_mail(subject, message, from_email, [to_email])
+# def send_task_assignment_email(task):
+#     subject = 'Task Assignment'
+#     message = f'You have been assigned a new task: {task.title}.'
+#     from_email = settings.DEFAULT_FROM_EMAIL
+#     to_email = task.assignee.email
+#     send_mail(subject, message, from_email, [to_email])
 
 
 """
