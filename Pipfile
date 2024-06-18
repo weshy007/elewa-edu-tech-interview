@@ -10,6 +10,12 @@ django-bootstrap4 = "*"
 django-crontab = "*"
 python-dateutil = "*"
 requests = "*"
+django-heroku = "*"
+gunicorn = "*"
+dj-database-url = "*"
+whitenoise = "*"
+psycopg2 = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
