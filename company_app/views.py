@@ -1,6 +1,9 @@
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.mail import send_mail
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -12,6 +15,22 @@ from .models import Department, Task, CustomUser
 # Create your views here.
 def index(request):
     return render(request, 'index.html')
+
+"""
+SEND EMAIL NOTIFICATIONS
+"""
+def send_task_assignment_email(task):
+    subject = f'New Task Assignment: {task.title}'
+    # Format the due date using strftime
+    due_date_formatted = task.due_date.strftime('%A, %B %d, %Y at %I:%M %p')
+    message = (
+        f'You have been assigned a new task.\n\n'
+        f'Title: {task.title}\n'
+        f'Due Date: {due_date_formatted}\n\n'
+        f'Please check the portal for further details.\n\n Regards,\nDepartment Manager\n\n'
+    )
+    recipient_list = [task.assignee.email]  # `assignee` is a `CustomUser` with an `email` field
+    send_mail(subject, message, None, recipient_list)
 
 
 def register(request):
@@ -86,7 +105,7 @@ def create_task(request):
         form = TaskForm(request.POST)
         if form.is_valid():
             task = form.save()
-            
+            send_task_assignment_email(task)
             messages.success(request, 'Task created successfully.')
             return redirect('manager_dashboard')
     else:
